@@ -33,6 +33,18 @@ Everything under `site/api/` is static JSON, served directly by GitHub Pages:
 - `GET /api/index.json` — lightweight list (id, name, category, icon, price) for search/browse UIs.
 - `GET /api/apps/{appId}.json` — single app lookup by id.
 
+## No externally-hosted assets
+
+The app icon, screenshots, and the build itself are all uploaded directly to the
+submission issue using GitHub's native file-upload form field — never accepted as a
+link to a URL the developer controls. A submitter-hosted image link could be swapped
+out for something malicious after review passes; uploading to GitHub means the exact
+bytes reviewed are the bytes that ship. `developerWebsite`, `supportWebsite`, and
+`privacyPolicyUrl` are still external links (that's expected — they're outbound links a
+visitor clicks, not assets the site auto-loads), but nothing the browser fetches
+automatically (`<img>` icon, screenshots, the download button) ever points off GitHub
+until the maintainer explicitly re-hosts it.
+
 ## Hosting the build (.pkg / .app.zip)
 
 The catalog only ever stores metadata + a download URL — never the binary itself. The

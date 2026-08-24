@@ -39,6 +39,12 @@ function parseUploadUrl(raw) {
   return match ? match[1] : "";
 }
 
+// Multiple files dropped into one upload field each render as their own markdown link.
+function parseUploadUrls(raw) {
+  const matches = String(raw || "").matchAll(/\]\((https?:\/\/[^\s)]+)\)/g);
+  return [...matches].map((m) => m[1]);
+}
+
 const bundleId = f["Bundle ID"];
 const developerName = f["Developer / Company Name"];
 const appId = numericIdFrom(`app:${bundleId}`);
@@ -117,9 +123,9 @@ const app = {
     dataTypesCollected: parseDataTypes(f["Data Types Collected"]),
   },
   assets: {
-    appIconUrl: f["App Icon URL (1024x1024)"],
+    appIconUrl: parseUploadUrl(f["App Icon (1024x1024)"]),
     screenshots: {
-      pearos: toLines(f["Screenshots (pearOS)"]),
+      pearos: parseUploadUrls(f["Screenshots (pearOS)"]),
     },
   },
 };

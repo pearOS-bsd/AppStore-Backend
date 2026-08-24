@@ -308,17 +308,23 @@ body:
     validations:
       required: false
 
-  - type: input
-    id: app_icon_url
+  - type: upload
+    id: app_icon_upload
     attributes:
-      label: App Icon URL (1024x1024)
+      label: App Icon (1024x1024)
+      description: >-
+        Drag and drop the icon image file. Uploaded directly to this issue — we never
+        load images from an external link you control, to keep the store safe from
+        assets being swapped out after review.
     validations:
       required: true
+      accept: ".png,.jpg,.jpeg"
 
-  - type: textarea
-    id: screenshots
+  - type: upload
+    id: screenshots_upload
     attributes:
       label: Screenshots (pearOS)
-      description: One image URL per line.
+      description: Drag and drop one or more screenshot image files.
     validations:
       required: true
+      accept: ".png,.jpg,.jpeg"
