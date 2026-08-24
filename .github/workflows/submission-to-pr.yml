@@ -1,0 +1,114 @@
+name: Process App Submission
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  process:
+    if: contains(github.event.issue.labels.*.name, 'app-submission')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Dump issue body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            fs.writeFileSync('/tmp/issue_body.txt', context.payload.issue.body || '');
+
+      - name: Parse issue into app JSON
+        id: parse
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+          ISSUE_BODY_FILE: /tmp/issue_body.txt
+        run: node scripts/parse-issue.js
+
+      - name: Comment validation failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let details = 'See workflow run logs for details.';
+            try {
+              const errors = JSON.parse(fs.readFileSync('/tmp/validation-errors.json', 'utf8'));
+              details = '```json\n' + JSON.stringify(errors, null, 2) + '\n```';
+            } catch (e) {}
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `❌ **App Review: submission rejected automatically.**\n\nYour submission did not pass schema validation:\n\n${details}\n\nPlease edit this issue and correct the fields, then re-open it.`,
+            });
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: ['invalid-submission'],
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+            });
+
+      - name: Create branch and commit
+        run: |
+          git config user.name "appstore-bot"
+          git config user.email "appstore-bot@users.noreply.github.com"
+          BRANCH="submission/${{ github.event.issue.number }}-${{ steps.parse.outputs.appId }}"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH"
+          git add "${{ steps.parse.outputs.outFile }}"
+          git commit -m "App submission: ${{ steps.parse.outputs.appName }} (#${{ github.event.issue.number }})"
+          git push origin "$BRANCH"
+
+      - name: Open review PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "App Review: ${{ steps.parse.outputs.appName }} (#${{ github.event.issue.number }})" \
+            --body "Automated submission from #${{ github.event.issue.number }}. Merge to approve and publish, close without merging to reject." \
+            --base main \
+            --head "$BRANCH" \
+            --label "in-review"
+
+      - name: Comment on issue and label as in-review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prUrl = require('child_process').execSync('gh pr view "$BRANCH" --json url -q .url', { env: process.env }).toString().trim();
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `✅ Your submission passed automated validation and is now **In Review**: ${prUrl}`,
+            });
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: ['in-review'],
+            });
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ env.BRANCH }}

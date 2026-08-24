@@ -1,0 +1,142 @@
+name: App Review Decision
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  approved:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'submission/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Resolve issue number and appId from branch
+        id: meta
+        run: |
+          REF="${{ github.event.pull_request.head.ref }}"
+          REST="${REF#submission/}"
+          ISSUE_NUMBER="${REST%%-*}"
+          APP_ID="${REST#*-}"
+          echo "issueNumber=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "appId=$APP_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Move app to approved and rebuild database
+        run: |
+          mkdir -p data/approved
+          SRC="data/pending/${{ steps.meta.outputs.appId }}.json"
+          DST="data/approved/${{ steps.meta.outputs.appId }}.json"
+          node -e "
+            const fs = require('fs');
+            const app = JSON.parse(fs.readFileSync('$SRC', 'utf8'));
+            app.status = 'approved';
+            fs.writeFileSync('$DST', JSON.stringify(app, null, 2) + '\n');
+          "
+          git rm --ignore-unmatch "$SRC"
+          node scripts/build-database.js
+          if [ -z "$(node -e "console.log(JSON.parse(require('fs').readFileSync('$DST','utf8')).currentRelease.downloadUrl || '')")" ]; then
+            echo "MISSING_DOWNLOAD_URL=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Commit published database
+        run: |
+          git config user.name "appstore-bot"
+          git config user.email "appstore-bot@users.noreply.github.com"
+          git add data/approved site/api
+          git commit -m "Publish app ${{ steps.meta.outputs.appId }} (approved from issue #${{ steps.meta.outputs.issueNumber }})"
+          git push origin main
+
+      - name: Close issue as published
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = Number("${{ steps.meta.outputs.issueNumber }}");
+            const appId = "${{ steps.meta.outputs.appId }}";
+            const missingDownload = process.env.MISSING_DOWNLOAD_URL === 'true';
+            const body = missingDownload
+              ? `🎉 **App Review: Approved.** Your app is listed on the pearOS App Store, but no build download link was attached yet — the maintainer still needs to run \`node scripts/attach-build.js data/approved/${appId}.json --url <releaseAssetUrl>\` and push to main.`
+              : `🎉 **App Review: Approved.** Your app is now live on the pearOS App Store.`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body,
+            });
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: ['published'],
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              state: 'closed',
+            });
+
+  rejected:
+    if: github.event.pull_request.merged == false && startsWith(github.event.pull_request.head.ref, 'submission/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Resolve issue number and appId from branch
+        id: meta
+        run: |
+          REF="${{ github.event.pull_request.head.ref }}"
+          REST="${REF#submission/}"
+          ISSUE_NUMBER="${REST%%-*}"
+          APP_ID="${REST#*-}"
+          echo "issueNumber=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "appId=$APP_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Remove rejected pending entry
+        run: |
+          git config user.name "appstore-bot"
+          git config user.email "appstore-bot@users.noreply.github.com"
+          if git rm --ignore-unmatch "data/pending/${{ steps.meta.outputs.appId }}.json"; then
+            git commit -m "Remove rejected submission ${{ steps.meta.outputs.appId }}" || true
+            git push origin main || true
+          fi
+
+      - name: Close issue as rejected
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = Number("${{ steps.meta.outputs.issueNumber }}");
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `❌ **App Review: Rejected.** The review PR was closed without merging. Feel free to open a new submission addressing any concerns.`,
+            });
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: ['rejected'],
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              state: 'closed',
+            });

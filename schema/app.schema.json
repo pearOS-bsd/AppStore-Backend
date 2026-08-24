@@ -1,0 +1,206 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/pearos/app-store-backend/schema/app.schema.json",
+  "title": "pearOS App Store Entry",
+  "type": "object",
+  "required": [
+    "appId",
+    "bundleId",
+    "platform",
+    "developer",
+    "generalInfo",
+    "pearOsRequirements",
+    "commercial",
+    "currentRelease",
+    "localizedMetadata",
+    "ratingsAndReviews",
+    "appPrivacy",
+    "assets",
+    "status"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "appId": { "type": "integer" },
+    "bundleId": { "type": "string", "pattern": "^[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)+$" },
+    "platform": { "type": "string", "enum": ["pearOS"] },
+    "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+    "submission": {
+      "type": "object",
+      "properties": {
+        "issueNumber": { "type": "integer" },
+        "submittedAt": { "type": "string", "format": "date-time" },
+        "submittedBy": { "type": "string" },
+        "buildUploadUrl": {
+          "description": "Raw GitHub attachment URL from the submission issue's upload field, as staged by the developer before the maintainer rehosts it as a Release asset.",
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "developer": {
+      "type": "object",
+      "required": ["developerId", "name", "developerWebsite", "supportWebsite"],
+      "additionalProperties": false,
+      "properties": {
+        "developerId": { "type": "integer" },
+        "name": { "type": "string", "minLength": 1 },
+        "developerWebsite": { "type": "string", "format": "uri" },
+        "supportWebsite": { "type": "string", "format": "uri" }
+      }
+    },
+    "generalInfo": {
+      "type": "object",
+      "required": ["defaultLanguage", "category", "contentAdvisoryRating"],
+      "additionalProperties": false,
+      "properties": {
+        "defaultLanguage": { "type": "string" },
+        "category": {
+          "type": "object",
+          "required": ["primary"],
+          "additionalProperties": false,
+          "properties": {
+            "primary": { "type": "string" },
+            "secondary": { "type": "string" }
+          }
+        },
+        "contentAdvisoryRating": { "type": "string", "enum": ["4+", "9+", "12+", "17+"] }
+      }
+    },
+    "pearOsRequirements": {
+      "type": "object",
+      "required": ["minimumPearOsVersion", "supportedArchitectures", "isUniversalBinary", "pearAppSandboxEnabled", "hardenedRuntime", "entitlements"],
+      "additionalProperties": false,
+      "properties": {
+        "minimumPearOsVersion": { "type": "string" },
+        "supportedArchitectures": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["x86_64", "arm64"] },
+          "minItems": 1
+        },
+        "isUniversalBinary": { "type": "boolean" },
+        "pearAppSandboxEnabled": { "type": "boolean" },
+        "hardenedRuntime": { "type": "boolean" },
+        "entitlements": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "commercial": {
+      "type": "object",
+      "required": ["isFree", "price", "currency", "inAppPurchasesAvailable", "inAppPurchasesList"],
+      "additionalProperties": false,
+      "properties": {
+        "isFree": { "type": "boolean" },
+        "price": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string" },
+        "inAppPurchasesAvailable": { "type": "boolean" },
+        "inAppPurchasesList": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "price", "type"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "price": { "type": "number" },
+              "type": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "currentRelease": {
+      "type": "object",
+      "required": ["version", "buildNumber", "releaseDate", "downloadSizeFormatted", "downloadSizeBytes", "binaryType", "supportedDeviceModels"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "buildNumber": { "type": "string" },
+        "releaseDate": { "type": "string", "format": "date-time" },
+        "downloadSizeFormatted": { "type": "string" },
+        "downloadSizeBytes": { "type": "integer", "minimum": 0 },
+        "binaryType": { "type": "string" },
+        "supportedDeviceModels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "downloadUrl": {
+          "description": "Permanent link to the universal build (GitHub Release asset). Attached by the maintainer during review — absent while status is pending.",
+          "type": "string",
+          "format": "uri"
+        },
+        "thinnedDownloads": {
+          "description": "Optional per-architecture installers (App Thinning), also attached by the maintainer during review.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "arm64": { "type": "string", "format": "uri" },
+            "x86_64": { "type": "string", "format": "uri" }
+          }
+        }
+      }
+    },
+    "localizedMetadata": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["title", "subtitle", "description", "whatsNew"],
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "subtitle": { "type": "string" },
+          "description": { "type": "string" },
+          "whatsNew": { "type": "string" }
+        }
+      }
+    },
+    "ratingsAndReviews": {
+      "type": "object",
+      "required": ["averageUserRating", "userRatingCount"],
+      "additionalProperties": false,
+      "properties": {
+        "averageUserRating": { "type": "number", "minimum": 0, "maximum": 5 },
+        "userRatingCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "appPrivacy": {
+      "type": "object",
+      "required": ["privacyPolicyUrl", "dataTypesCollected"],
+      "additionalProperties": false,
+      "properties": {
+        "privacyPolicyUrl": { "type": "string", "format": "uri" },
+        "dataTypesCollected": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["purpose", "dataTypes"],
+            "additionalProperties": false,
+            "properties": {
+              "purpose": { "type": "string" },
+              "dataTypes": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "required": ["appIconUrl", "screenshots"],
+      "additionalProperties": false,
+      "properties": {
+        "appIconUrl": { "type": "string", "format": "uri" },
+        "screenshots": {
+          "type": "object",
+          "required": ["pearos"],
+          "additionalProperties": false,
+          "properties": {
+            "pearos": { "type": "array", "items": { "type": "string", "format": "uri" } }
+          }
+        }
+      }
+    }
+  }
+}

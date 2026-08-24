@@ -1,0 +1,37 @@
+name: Validate Submission
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/pending/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: node scripts/validate.js data/pending
+
+  build-asset-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check a download link was attached
+        run: |
+          missing=0
+          for f in data/pending/*.json; do
+            [ -e "$f" ] || continue
+            url=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$f','utf8')).currentRelease.downloadUrl || '')")
+            if [ -z "$url" ]; then
+              echo "::error file=$f::No currentRelease.downloadUrl set yet. Download the build from the issue's transfer link, host it as a GitHub Release (gh release upload), then run: node scripts/attach-build.js $f --url <releaseAssetUrl>"
+              missing=1
+            else
+              echo "$f -> $url"
+            fi
+          done
+          exit $missing

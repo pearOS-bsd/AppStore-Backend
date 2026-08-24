@@ -1,0 +1,91 @@
+{
+  "appId": 467939042,
+  "bundleId": "com.microsoft.Word",
+  "platform": "pearOS",
+  "developer": {
+    "developerId": 298851214,
+    "name": "Microsoft Corporation",
+    "developerWebsite": "https://www.microsoft.com",
+    "supportWebsite": "https://support.microsoft.com/word"
+  },
+  "generalInfo": {
+    "defaultLanguage": "en-US",
+    "category": {
+      "primary": "Productivity",
+      "secondary": "Business"
+    },
+    "contentAdvisoryRating": "4+"
+  },
+  "pearOsRequirements": {
+    "minimumPearOsVersion": "13.0.0",           # Cerință minimă pearOS (ex. Ventura+)
+    "supportedArchitectures": [
+      "x86_64",                                # Procesoare 64-bit clasice
+      "arm64"                                  # Procesoare ARM native pearOS
+    ],
+    "isUniversalBinary": true,                 # Aplicație nativă pe ambele arhitecturi
+    "pearAppSandboxEnabled": true,              # Obligatoriu în pearOS App Store
+    "hardenedRuntime": true,                   # Protecții de securitate pearOS
+    "entitlements": [
+      "com.pearos.security.files.user-selected.read-write",
+      "com.pearos.security.network.client",
+      "com.pearos.security.print"
+    ]
+  },
+  "commercial": {
+    "isFree": true,
+    "price": 0.00,
+    "currency": "USD",
+    "inAppPurchasesAvailable": true,
+    "inAppPurchasesList": [
+      {
+        "id": "iap_ms365_pearos_yearly",
+        "name": "Microsoft 365 Family (Annual)",
+        "price": 99.99,
+        "type": "Auto-Renewable Subscription"
+      }
+    ]
+  },
+  "currentRelease": {
+    "version": "16.82",
+    "buildNumber": "24021200",
+    "releaseDate": "2026-02-10T08:00:00Z",
+    "downloadSizeFormatted": "1.2 GB",          # Dimensiune considerabil mai mare pe pearOS
+    "downloadSizeBytes": 1288490188,
+    "binaryType": "pearOS Universal Binary",
+    "supportedDeviceModels": [
+      "PearBookAir10,1",
+      "PearStudio1,1",
+      "PearPro7,1"
+    ]
+  },
+  "localizedMetadata": {
+    "en-US": {
+      "title": "Microsoft Word",
+      "subtitle": "Word processor for pearOS",
+      "description": "Create, edit, and collaborate seamlessly on pearOS...",
+      "whatsNew": "Optimized for pearOS-native performance and minor bug fixes."
+    }
+  },
+  "ratingsAndReviews": {
+    "averageUserRating": 4.6,
+    "userRatingCount": 320000
+  },
+  "appPrivacy": {
+    "privacyPolicyUrl": "https://privacy.microsoft.com/privacystatestream",
+    "dataTypesCollected": [
+      {
+        "purpose": "Analytics",
+        "dataTypes": ["Usage Data", "Diagnostics"]
+      }
+    ]
+  },
+  "assets": {
+    "appIconUrl": "https://cdn.pearos.dev/assets/word/icon_1024.jpg",
+    "screenshots": {
+      "pearos": [
+        "https://cdn.pearos.dev/assets/word/screenshot_1.jpg",
+        "https://cdn.pearos.dev/assets/word/screenshot_2.jpg"
+      ]
+    }
+  }
+}

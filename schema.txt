@@ -1,0 +1,28 @@
+/app-store-assets/
+├── pearos-apps/
+│   └── app_id_467939042/                      # Unique App ID pentru versiunea pearOS
+│       └── builds/
+│           ├── v16.82.0_b240101/
+│           │   ├── universal_installer.pkg    # Pachet de instalare brut (trimis de dev)
+│           │   ├── AppBundle.app.zip          # Arhivă completă App Bundle
+│           │   └── thinned/                   # App Thinning / Split pe arhitecturi
+│           │       ├── pearos_arm64.pkg       # DEDICAT pearOS Silicon (P1/P2/P3/P4)
+│           │       └── pearos_x86_64.pkg      # DEDICAT procesoarelor x86_64
+│           └── v16.83.0_b240215/
+│               └── ...
+└── media/
+    └── app_id_467939042/
+        ├── icon/
+        │   ├── pear_app_icon_512x512.png
+        │   └── pear_app_icon_1024x1024.picns   # Formatul nativ pearOS (.picns)
+        └── screenshots/
+            ├── locale_en-US/
+            │   ├── pearbook_pro_16/           # Screenshot-uri la rezoluție de laptop pearOS
+            │   │   ├── screenshot_1_3456x2234.png
+            │   │   └── screenshot_2_3456x2234.png
+            │   ├── pear_display_5k/
+            │   │   └── screenshot_1_5120x2880.png
+            │   └── app_preview_pearos.mp4
+            └── locale_en-US/
+                └── pearbook_pro_16/
+                    └── screenshot_1_3456x2234.png
