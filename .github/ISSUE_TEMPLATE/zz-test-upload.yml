@@ -1,0 +1,10 @@
+name: "Test Upload Type"
+description: "Diagnostic form to check if the 'upload' field type renders."
+title: "[TestUpload] "
+body:
+  - type: upload
+    id: sample_upload
+    attributes:
+      label: Sample upload
+    validations:
+      required: true
