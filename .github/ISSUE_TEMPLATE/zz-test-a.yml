@@ -1,188 +1,65 @@
-name: Test Half A2
+name: Test C1v2
 description: diagnostic
-title: '[TestA2v2] '
+title: '[TestC1v2] '
 body:
-- type: markdown
-  attributes:
-    value: '## pearOS Developer Console — New App Submission
-
-      Fill in every field as accurately as possible. Once submitted, this issue is
-      picked up automatically
-
-      and a Pull Request is opened for review. Your app goes live only after the PR
-      is approved and merged.
-
-
-      **About the build file:** attach your `.pkg` / `.app.zip` directly below using
-      GitHub''s file upload
-
-      field. The maintainer will pick it up from this issue during review, host a
-      permanent copy as a
-
-      GitHub Release, and attach the final download link before merging.
-
-      '
 - type: input
-  id: app_name
+  id: currency
   attributes:
-    label: App Name
-    placeholder: Microsoft Word
-  validations:
-    required: true
-- type: input
-  id: bundle_id
-  attributes:
-    label: Bundle ID
-    placeholder: com.microsoft.Word
-  validations:
-    required: true
-- type: input
-  id: developer_name
-  attributes:
-    label: Developer / Company Name
-    placeholder: Microsoft Corporation
-  validations:
-    required: true
-- type: input
-  id: developer_website
-  attributes:
-    label: Developer Website
-    placeholder: https://www.microsoft.com
-  validations:
-    required: true
-- type: input
-  id: support_website
-  attributes:
-    label: Support Website
-    placeholder: https://support.microsoft.com/word
-  validations:
-    required: true
-- type: input
-  id: default_language
-  attributes:
-    label: Default Language
-    placeholder: en-US
-    value: en-US
+    label: Currency
+    value: USD
   validations:
     required: true
 - type: dropdown
-  id: category_primary
+  id: iap_available
   attributes:
-    label: Primary Category
-    options:
-    - Productivity
-    - Business
-    - Developer Tools
-    - Utilities
-    - Graphics & Design
-    - Photo & Video
-    - Music
-    - Games
-    - Education
-    - Finance
-    - Social Networking
-    - Health & Fitness
-  validations:
-    required: true
-- type: dropdown
-  id: category_secondary
-  attributes:
-    label: Secondary Category (optional)
-    description: Leave unselected if this app only needs one category.
-    options:
-    - Productivity
-    - Business
-    - Developer Tools
-    - Utilities
-    - Graphics & Design
-    - Photo & Video
-    - Music
-    - Games
-    - Education
-    - Finance
-    - Social Networking
-    - Health & Fitness
-  validations:
-    required: false
-- type: dropdown
-  id: content_rating
-  attributes:
-    label: Content Advisory Rating
-    options:
-    - 4+
-    - 9+
-    - 12+
-    - 17+
-  validations:
-    required: true
-- type: input
-  id: min_pearos_version
-  attributes:
-    label: Minimum pearOS Version
-    placeholder: 13.0.0
-  validations:
-    required: true
-- type: checkboxes
-  id: architectures
-  attributes:
-    label: Supported Architectures
-    description: Select at least one. Leaving both unchecked will fail review validation.
-    options:
-    - label: arm64
-    - label: x86_64
-- type: dropdown
-  id: universal_binary
-  attributes:
-    label: Universal Binary?
-    options:
-    - 'Yes'
-    - 'No'
-  validations:
-    required: true
-- type: dropdown
-  id: sandbox_enabled
-  attributes:
-    label: pearOS App Sandbox Enabled?
-    options:
-    - 'Yes'
-    - 'No'
-  validations:
-    required: true
-- type: dropdown
-  id: hardened_runtime
-  attributes:
-    label: Hardened Runtime Enabled?
+    label: In-App Purchases Available?
     options:
     - 'Yes'
     - 'No'
   validations:
     required: true
 - type: textarea
-  id: entitlements
+  id: iap_list
   attributes:
-    label: Entitlements
-    description: One entitlement per line.
-    placeholder: 'com.pearos.security.files.user-selected.read-write
-
-      com.pearos.security.network.client
+    label: In-App Purchases List
+    description: 'One per line, format: id|name|price|type'
+    placeholder: 'iap_pro_yearly|Pro Yearly|99.99|Auto-Renewable Subscription
 
       '
   validations:
     required: false
-- type: dropdown
-  id: is_free
+- type: input
+  id: version
   attributes:
-    label: Is the app free?
-    options:
-    - 'Yes'
-    - 'No'
+    label: Version
+    placeholder: 1.0.0
   validations:
     required: true
 - type: input
-  id: price
+  id: build_number
   attributes:
-    label: Price (0.00 if free)
-    placeholder: '0.00'
-    value: '0.00'
+    label: Build Number
+    placeholder: '24021200'
+  validations:
+    required: true
+- type: input
+  id: download_size_formatted
+  attributes:
+    label: Download Size (formatted)
+    placeholder: 1.2 GB
+  validations:
+    required: true
+- type: input
+  id: download_size_bytes
+  attributes:
+    label: Download Size (bytes)
+    placeholder: '1288490188'
+  validations:
+    required: true
+- type: input
+  id: binary_type
+  attributes:
+    label: Binary Type
+    value: pearOS Universal Binary
   validations:
     required: true
