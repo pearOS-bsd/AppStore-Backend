@@ -10,9 +10,11 @@ body:
         Fill in every field as accurately as possible. Once submitted, this issue is picked up automatically
         and a Pull Request is opened for review. Your app goes live only after the PR is approved and merged.
 
-        **About the build file:** attach your `.pkg` / `.app.zip` directly below using GitHub's file upload
-        field. The maintainer will pick it up from this issue during review, host a permanent copy as a
-        GitHub Release, and attach the final download link before merging.
+        **About uploaded files:** GitHub only allows one file-upload field per form, so every file goes
+        into the single "App Assets" field near the bottom — **in this exact order**: 1) your build
+        (`.pkg` or `.app.zip`), 2) your app icon image, 3) one or more screenshot images. Everything is
+        uploaded directly to this issue, never linked from an external site, so nothing can be swapped out
+        after review. The maintainer re-hosts the build permanently as a GitHub Release before merging.
 
   - type: input
     id: app_name
@@ -258,17 +260,6 @@ body:
     validations:
       required: false
 
-  - type: upload
-    id: build_upload
-    attributes:
-      label: Build File (.pkg or .app.zip)
-      description: >-
-        Drag and drop your installer or app bundle archive here. The maintainer downloads it from this
-        issue during review — it is not published on the public site.
-    validations:
-      required: true
-      accept: ".pkg,.zip"
-
   - type: input
     id: subtitle
     attributes:
@@ -309,22 +300,14 @@ body:
       required: false
 
   - type: upload
-    id: app_icon_upload
+    id: asset_upload
     attributes:
-      label: App Icon (1024x1024)
+      label: App Assets
       description: >-
-        Drag and drop the icon image file. Uploaded directly to this issue — we never
-        load images from an external link you control, to keep the store safe from
-        assets being swapped out after review.
+        GitHub only allows ONE upload field per form, so everything goes here. Drop files in
+        this exact order: 1) your build (.pkg or .app.zip), 2) your app icon image,
+        3) one or more screenshot images. Nothing here is ever linked from an external site,
+        so it can't be swapped out after review.
     validations:
       required: true
-      accept: ".png,.jpg,.jpeg"
-
-  - type: upload
-    id: screenshots_upload
-    attributes:
-      label: Screenshots (pearOS)
-      description: Drag and drop one or more screenshot image files.
-    validations:
-      required: true
-      accept: ".png,.jpg,.jpeg"
+      accept: ".pkg,.zip,.png,.jpg,.jpeg"

@@ -33,16 +33,21 @@ function parseDataTypes(raw) {
   });
 }
 
-// GitHub renders an uploaded file as a markdown link: [filename.zip](https://...)
-function parseUploadUrl(raw) {
-  const match = String(raw || "").match(/\]\((https?:\/\/[^\s)]+)\)/);
-  return match ? match[1] : "";
-}
-
-// Multiple files dropped into one upload field each render as their own markdown link.
-function parseUploadUrls(raw) {
-  const matches = String(raw || "").matchAll(/\]\((https?:\/\/[^\s)]+)\)/g);
-  return [...matches].map((m) => m[1]);
+// GitHub renders each uploaded file as its own markdown link: [filename.ext](https://...)
+// GitHub only allows one `upload` field per form, so build/icon/screenshots all land in
+// one field. The submitter drops them in order: build first, icon second, screenshots after.
+function parseUploads(raw) {
+  const matches = [...String(raw || "").matchAll(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g)];
+  const files = matches.map((m) => ({ name: m[1], url: m[2] }));
+  const isBuild = (f) => /\.(pkg|zip)$/i.test(f.name);
+  const isImage = (f) => /\.(png|jpe?g)$/i.test(f.name);
+  const buildFile = files.find(isBuild);
+  const images = files.filter(isImage);
+  return {
+    buildUploadUrl: buildFile ? buildFile.url : "",
+    appIconUrl: images[0] ? images[0].url : "",
+    screenshotUrls: images.slice(1).map((f) => f.url),
+  };
 }
 
 const bundleId = f["Bundle ID"];
@@ -55,7 +60,7 @@ if (toChecked(f["Supported Architectures"], "arm64")) architectures.push("arm64"
 if (toChecked(f["Supported Architectures"], "x86_64")) architectures.push("x86_64");
 
 const secondary = f["Secondary Category (optional)"];
-const buildUploadUrl = parseUploadUrl(f["Build File (.pkg or .app.zip)"]);
+const { buildUploadUrl, appIconUrl, screenshotUrls } = parseUploads(f["App Assets"]);
 
 const app = {
   appId,
@@ -123,9 +128,9 @@ const app = {
     dataTypesCollected: parseDataTypes(f["Data Types Collected"]),
   },
   assets: {
-    appIconUrl: parseUploadUrl(f["App Icon (1024x1024)"]),
+    appIconUrl,
     screenshots: {
-      pearos: parseUploadUrls(f["Screenshots (pearOS)"]),
+      pearos: screenshotUrls,
     },
   },
 };
