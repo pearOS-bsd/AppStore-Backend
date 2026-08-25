@@ -46,16 +46,16 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            let details = 'See workflow run logs for details.';
+            let details = 'See the workflow run logs for details.';
             try {
               const errors = JSON.parse(fs.readFileSync('/tmp/validation-errors.json', 'utf8'));
-              details = '```json\n' + JSON.stringify(errors, null, 2) + '\n```';
+              details = errors.map((e) => `- ${typeof e === 'string' ? e : `${e.instancePath || e.path || '(field)'} ${e.message || JSON.stringify(e)}`}`).join('\n');
             } catch (e) {}
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.issue.number,
-              body: `❌ **App Review: submission rejected automatically.**\n\nYour submission did not pass schema validation:\n\n${details}\n\nPlease edit this issue and correct the fields, then re-open it.`,
+              body: `❌ **App Review: submission rejected automatically.**\n\nYour submission has the following problem(s):\n\n${details}\n\nPlease edit this issue to fix them, then re-open it.`,
             });
             await github.rest.issues.addLabels({
               owner: context.repo.owner,

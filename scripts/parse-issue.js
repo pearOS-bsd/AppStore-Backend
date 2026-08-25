@@ -43,10 +43,29 @@ function parseUploads(raw) {
   const isImage = (f) => /\.(png|jpe?g)$/i.test(f.name);
   const buildFile = files.find(isBuild);
   const images = files.filter(isImage);
+
+  // Prefer a file whose name says "icon" over just taking the first image, in case the
+  // submitter didn't drop files in the exact requested order.
+  const iconIndex = images.findIndex((f) => /icon/i.test(f.name));
+  const icon = iconIndex >= 0 ? images[iconIndex] : images[0];
+  const screenshots = images.filter((_, i) => i !== (iconIndex >= 0 ? iconIndex : 0));
+
+  const errors = [];
+  if (!buildFile) {
+    errors.push("No .zip build file found in \"App Assets\" — attach your build zipped as a .zip (raw .pkg uploads aren't accepted).");
+  }
+  if (!icon) {
+    errors.push("No icon image found in \"App Assets\" — attach a .png/.jpg icon image.");
+  }
+  if (screenshots.length < 1) {
+    errors.push("No screenshot images found in \"App Assets\" — attach at least one screenshot in addition to the icon.");
+  }
+
   return {
     buildUploadUrl: buildFile ? buildFile.url : "",
-    appIconUrl: images[0] ? images[0].url : "",
-    screenshotUrls: images.slice(1).map((f) => f.url),
+    appIconUrl: icon ? icon.url : "",
+    screenshotUrls: screenshots.map((f) => f.url),
+    uploadErrors: errors,
   };
 }
 
@@ -60,7 +79,7 @@ if (toChecked(f["Supported Architectures"], "arm64")) architectures.push("arm64"
 if (toChecked(f["Supported Architectures"], "x86_64")) architectures.push("x86_64");
 
 const secondary = f["Secondary Category (optional)"];
-const { buildUploadUrl, appIconUrl, screenshotUrls } = parseUploads(f["App Assets"]);
+const { buildUploadUrl, appIconUrl, screenshotUrls, uploadErrors } = parseUploads(f["App Assets"]);
 
 const app = {
   appId,
@@ -136,10 +155,12 @@ const app = {
 };
 
 const result = validateApp(app);
-if (!result.valid) {
-  console.error("Schema validation failed:");
+if (uploadErrors.length > 0 || !result.valid) {
+  console.error("Validation failed:");
+  console.error(uploadErrors.join("\n"));
   console.error(JSON.stringify(result.errors, null, 2));
-  fs.writeFileSync("/tmp/validation-errors.json", JSON.stringify(result.errors, null, 2));
+  const combined = [...uploadErrors, ...(result.errors || []).map((e) => `${e.instancePath || "(root)"} ${e.message}`)];
+  fs.writeFileSync("/tmp/validation-errors.json", JSON.stringify(combined, null, 2));
   process.exit(1);
 }
 
