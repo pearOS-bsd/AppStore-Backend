@@ -1,14 +1,11 @@
-name: Test OnlyDesc
+name: Test AcceptArc
 description: diagnostic
-title: '[TestOnlyDesc] '
+title: '[TestAcceptArc] '
 body:
 - type: upload
-  id: asset_upload
+  id: x
   attributes:
-    label: App Assets
-    description: 'GitHub only allows ONE upload field per form, so everything goes
-      here. Drop files in this exact order: 1) your build (.pkg or .app.zip), 2) your
-      app icon image, 3) one or more screenshot images. Nothing here is ever linked
-      from an external site, so it can''t be swapped out after review.'
+    label: X
   validations:
     required: true
+    accept: .pkg,.zip

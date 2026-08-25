@@ -1,11 +1,11 @@
-name: Test OnlyAccept
+name: Test AcceptImg
 description: diagnostic
-title: '[TestOnlyAccept] '
+title: '[TestAcceptImg] '
 body:
 - type: upload
-  id: asset_upload
+  id: x
   attributes:
-    label: App Assets
+    label: X
   validations:
     required: true
-    accept: .pkg,.zip,.png,.jpg,.jpeg
+    accept: .png,.jpg,.jpeg
