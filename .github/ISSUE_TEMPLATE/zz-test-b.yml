@@ -1,6 +1,6 @@
-name: Test AcceptArc
+name: Test AcceptZip
 description: diagnostic
-title: '[TestAcceptArc] '
+title: '[TestAcceptZip] '
 body:
 - type: upload
   id: x
@@ -8,4 +8,4 @@ body:
     label: X
   validations:
     required: true
-    accept: .pkg,.zip
+    accept: .zip

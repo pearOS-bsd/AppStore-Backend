@@ -1,6 +1,6 @@
-name: Test AcceptImg
+name: Test AcceptPkg
 description: diagnostic
-title: '[TestAcceptImg] '
+title: '[TestAcceptPkg] '
 body:
 - type: upload
   id: x
@@ -8,4 +8,4 @@ body:
     label: X
   validations:
     required: true
-    accept: .png,.jpg,.jpeg
+    accept: .pkg
