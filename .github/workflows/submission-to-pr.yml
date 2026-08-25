@@ -2,7 +2,7 @@ name: Process App Submission
 
 on:
   issues:
-    types: [opened]
+    types: [opened, labeled]
 
 permissions:
   contents: write
@@ -11,7 +11,9 @@ permissions:
 
 jobs:
   process:
-    if: contains(github.event.issue.labels.*.name, 'app-submission')
+    if: >-
+      (github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'app-submission')) ||
+      (github.event.action == 'labeled' && github.event.label.name == 'app-submission')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
